@@ -19,7 +19,13 @@ class GameUI:
         self.menu = Menu()
         self.menu_renderer = MenuRenderer(self.win, self.menu)
         self.board = None
-        self.running = False 
+        self.running = False
+        # Initialize buttons
+        self.buttons = [
+            {"text": "Undo", "rect": pygame.Rect(9.5 * GAP, 2 * GAP, 1.5 * GAP, GAP), "action": "undo"},
+            {"text": "Reset", "rect": pygame.Rect(9.5 * GAP, 4 * GAP, 1.5 * GAP, GAP), "action": "reset"},
+            {"text": "Quit", "rect": pygame.Rect(9.5 * GAP, 6 * GAP, 1.5 * GAP, GAP), "action": "quit"}
+        ]
 
     def update_display(self, gameState: list, board):
         """
@@ -93,7 +99,7 @@ class GameUI:
                                        (radius, radius), radius)
                     self.win.blit(shape_surf, target_rect)
 
-        # Hightline last positon and new position of the piece
+        # Highlight last position and new position of the piece
         if fromPos:
             center = ((fromPos[1]+0.5)*GAP, (fromPos[0]+0.5)*GAP)
             pygame.draw.circle(self.win, Color.PURPLE, center,
@@ -118,7 +124,31 @@ class GameUI:
             pygame.draw.circle(shape_surf, Color.RED, (radius, radius), radius)
             self.win.blit(shape_surf, target_rect)
 
+        # Draw buttons
+        for button in self.buttons:
+            pygame.draw.rect(self.win, Color.ORANGE, button["rect"], border_radius=10)
+            pygame.draw.rect(self.win, Color.DARK_YELLOW, button["rect"].inflate(-10, -10))
+            text_surface = pygame.font.Font("assets/font/svn bango.ttf", 30).render(
+                button["text"], True, Color.BLACK)
+            text_rect = text_surface.get_rect(center=button["rect"].center)
+            self.win.blit(text_surface, text_rect)
+
         pygame.display.update()
 
+    def handle_button_click(self, pos):
+        """
+        Check if a button was clicked and perform the corresponding action.
+        """
+        for button in self.buttons:
+            if button["rect"].collidepoint(pos):
+                if button["action"] == "undo":
+                    self.board.undo_move()
+                elif button["action"] == "reset":
+                    self.board.reset_board()
+                elif button["action"] == "quit":
+                    self.running = False
+                    pygame.quit()
+                    sys.exit()
+
     def play_sound(self, action: str):
-        pass  
+        pass
